@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kestrel Request Router</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#1d2330; --muted:#5b6475; --line:#dde1e8;
+          --accent:#1f6feb; --ok:#1a7f37; --warn:#b35900; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); }
+  main { max-width:760px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:1.4rem; margin:0 0 4px; }
+  p.sub { color:var(--muted); margin:0 0 20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:16px; }
+  label { display:block; font-size:.85rem; font-weight:600; margin:0 0 6px; }
+  textarea, select { width:100%; font:inherit; padding:9px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  textarea { min-height:90px; resize:vertical; }
+  .row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px; }
+  @media (max-width:600px) { .row { grid-template-columns:1fr; } }
+  .examples { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:12px 0 0; }
+  .examples span { font-size:.8rem; color:var(--muted); }
+  .examples button { font-size:.8rem; padding:6px 12px; border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:999px; cursor:pointer; }
+  .examples button:hover { border-color:var(--accent); }
+  .examples button.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+  button.go { margin-top:16px; width:100%; padding:11px; font:inherit; font-weight:600; color:#fff; background:var(--accent); border:0; border-radius:8px; cursor:pointer; }
+  .team { font-size:1.3rem; font-weight:700; }
+  .badge { display:inline-block; font-size:.8rem; font-weight:600; padding:3px 9px; border-radius:999px; margin-left:8px; vertical-align:middle; }
+  .auto { background:#dafbe1; color:var(--ok); } .manual { background:#fff1e5; color:var(--warn); }
+  .action { margin:10px 0; font-weight:600; }
+  ul { margin:8px 0 0; padding-left:20px; } li { margin:4px 0; }
+  .muted { color:var(--muted); font-size:.9rem; }
+  .error { color:var(--warn); font-weight:600; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Kestrel service-request router</h1>
+  <p class="sub">Paste a customer's opening message to see which team it should go to, and why.</p>
+
+  <div class="card">
+    <label for="text">Customer message</label>
+    <textarea id="text" placeholder="Type or paste the customer's message"></textarea>
+    <div class="examples">
+      <span>Try an example:</span>
+      <button data-ex="my air fryer stopped heating after two weeks|Air Fryer|in_warranty|chat">Fault</button>
+      <button data-ex="i was charged twice for the same order|Water Purifier|in_warranty|email">Double charge</button>
+      <button data-ex="fan delivered but not installed yet, fan making a grinding noise|Ceiling Fan|in_warranty|whatsapp">Two issues</button>
+      <button data-ex="please call me about my purifier|Water Purifier|shield|ivr">Unclear</button>
+    </div>
+    <div class="row">
+      <div><label for="product">Product</label>
+        <select id="product">
+          <option>Air Fryer</option><option>Ceiling Fan</option><option>Induction Cooktop</option>
+          <option>Mixer Grinder</option><option>Robot Vacuum</option><option>Room Heater</option><option>Water Purifier</option>
+        </select></div>
+      <div><label for="warranty">Warranty</label>
+        <select id="warranty">
+          <option value="in_warranty">In warranty</option><option value="shield">Kestrel Shield</option><option value="out_of_warranty">Out of warranty</option>
+        </select></div>
+      <div><label for="channel">Channel</label>
+        <select id="channel">
+          <option value="chat">Chat</option><option value="whatsapp">WhatsApp</option><option value="ivr">Phone (IVR)</option><option value="email">Email</option>
+        </select></div>
+    </div>
+    <button class="go" id="go">Route this request</button>
+  </div>
+
+  <div class="card" id="result" hidden></div>
+</main>
+<script>
+  const $ = id => document.getElementById(id);
+  const exampleButtons = document.querySelectorAll("[data-ex]");
+  const clearHighlight = () => exampleButtons.forEach(b => b.classList.remove("active"));
+
+  exampleButtons.forEach(b => b.onclick = () => {
+    const [t, p, w, c] = b.dataset.ex.split("|");
+    $("text").value = t; $("product").value = p; $("warranty").value = w; $("channel").value = c;
+    clearHighlight();
+    b.classList.add("active");
+    $("result").hidden = true;
+  });
+
+  ["text", "product", "warranty", "channel"].forEach(id => {
+    $(id).addEventListener("input", () => { clearHighlight(); $("result").hidden = true; });
+    $(id).addEventListener("change", () => { clearHighlight(); $("result").hidden = true; });
+  });
+
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+  const pct = x => `${(x * 100).toFixed(0)}%`;
+
+  $("go").onclick = async () => {
+    const box = $("result");
+    box.hidden = false;
+    box.innerHTML = '<p class="muted">Routing…</p>';
+    try {
+      const res = await fetch("/predict", {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ request_text: $("text").value, product_family: $("product").value,
+                               warranty_status: $("warranty").value, channel: $("channel").value })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        const msg = typeof data.detail === "string" ? data.detail : "Please enter a message of at least 3 characters.";
+        box.innerHTML = `<p class="error">${esc(msg)}</p>`;
+        return;
+      }
+      const reasons = `<div><strong>Why</strong><ul>${data.reasons.map(r => `<li>${esc(r)}</li>`).join("")}</ul></div>`;
+      const others = data.alternatives.map(a => `${esc(a.team)} (${pct(a.confidence)})`).join(", ");
+      if (data.auto_route) {
+        box.innerHTML = `
+          <div class="team">${esc(data.team)}<span class="badge auto">Auto-route</span></div>
+          <div class="muted">Confidence ${pct(data.confidence)}</div>
+          <div class="action">${esc(data.action)}</div>
+          ${reasons}
+          <p class="muted"><strong>${esc(data.team)} handles:</strong> ${esc(data.team_handles || "—")}</p>
+          <p class="muted">Next most likely: ${others}</p>`;
+      } else {
+        box.innerHTML = `
+          <div class="team">Call the customer back first<span class="badge manual">Needs a call-back</span></div>
+          <div class="action">Ask what the problem is before assigning a team. Guessing here is usually wrong.</div>
+          ${reasons}
+          <p class="muted">Weak best guess: ${esc(data.team)} (${pct(data.confidence)}); then ${others}.</p>`;
+      }
+    } catch (e) {
+      box.innerHTML = '<p class="error">Could not reach the routing service. Is it running?</p>';
+    }
+  };
+</script>
+</body>
+</html>

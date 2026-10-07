@@ -1,0 +1,74 @@
+--- DATA AND SPLITS ---
+FIT rows: 6519, TUNE rows: 2168, VALID rows: 2135
+
+M0 bot baseline   VALID accuracy: 0.767, macro-F1: 0.780
+M1 majority class VALID accuracy: 0.233, macro-F1: 0.054
+
+--- M2 logistic regression: tuning C on TUNE ---
+C=0.5: TUNE accuracy 0.846
+C=2: TUNE accuracy 0.843
+C=8: TUNE accuracy 0.843
+M2 logistic regression (C=0.5) VALID accuracy: 0.841, macro-F1: 0.847
+
+--- M3 logistic regression: tuning C on TUNE ---
+C=0.5: TUNE accuracy 0.847
+C=2: TUNE accuracy 0.844
+C=8: TUNE accuracy 0.847
+M3 logistic regression (C=0.5) VALID accuracy: 0.838, macro-F1: 0.842
+
+=== BEST: M2 logistic regression (C=0.5) ===
+
+Per-team report (VALID):
+                       precision    recall  f1-score   support
+
+              Billing      0.905     0.855     0.879       255
+Filters & Consumables      0.939     0.812     0.870       207
+      Installs & Demo      0.876     0.835     0.855       321
+       Product Advice      0.910     0.788     0.845       269
+              Repairs      0.720     0.926     0.810       498
+Returns & Replacement      0.871     0.810     0.839       326
+      Warranty Claims      0.880     0.792     0.833       259
+
+             accuracy                          0.841      2135
+            macro avg      0.871     0.831     0.847      2135
+         weighted avg      0.853     0.841     0.843      2135
+
+Confusion matrix (rows true, cols predicted):
+                       Billing  Filters & Consumables  Installs & Demo  Product Advice  Repairs  Returns & Replacement  Warranty Claims
+Billing                    218                      3                6               4       20                      3                1
+Filters & Consumables        1                    168                4               4       23                      3                4
+Installs & Demo              4                      1              268               3       35                      7                3
+Product Advice               2                      2                3             212       38                      4                8
+Repairs                      4                      2               10               4      461                     10                7
+Returns & Replacement        6                      2                3               3       43                    264                5
+Warranty Claims              6                      1               12               3       20                     12              205
+
+Accuracy by product family (model vs bot):
+Air Fryer: model 0.856, bot 0.812, rows 382
+Ceiling Fan: model 0.865, bot 0.802, rows 252
+Induction Cooktop: model 0.820, bot 0.775, rows 267
+Mixer Grinder: model 0.833, bot 0.812, rows 330
+Robot Vacuum: model 0.787, bot 0.764, rows 216
+Room Heater: model 0.843, bot 0.778, rows 248
+Water Purifier: model 0.859, bot 0.664, rows 440
+
+Versus bot on VALID (2135 rows):
+Both right: 1574
+Both wrong: 276
+Bot right, model wrong: 63
+Model right, bot wrong: 222
+
+Coverage table (auto-route only if top probability >= threshold):
+Threshold 0.0: auto-routed 100.0%, accuracy on those 0.841
+Threshold 0.4: auto-routed 85.7%, accuracy on those 0.942
+Threshold 0.5: auto-routed 82.9%, accuracy on those 0.952
+Threshold 0.6: auto-routed 80.7%, accuracy on those 0.962
+Threshold 0.7: auto-routed 79.4%, accuracy on those 0.969
+Threshold 0.8: auto-routed 73.5%, accuracy on those 0.976
+
+Average misroute cost per request on VALID (Rs 742 per misroute):
+Bot: Rs 173
+Model: Rs 118
+
+Saved VALID predictions to data/work/valid_predictions.csv
+Refit on all train rows; saved to outputs/model.joblib

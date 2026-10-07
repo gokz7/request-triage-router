@@ -1,0 +1,103 @@
+1. FILE STATS
+train: 10822 rows, 8 cols, nulls: none
+test: 2178 rows, 7 cols, nulls: none
+resolution_log: 10822 rows, 5 cols, nulls: none
+teams: 7 rows, 3 cols, nulls: {'renamed_to': 5}
+
+2. TEAM MAPPING
+Renames (old -> current): {'Installations': 'Installs & Demo', 'Installs & Demo (from 15 Jan 2026)': 'Installs & Demo', 'Consumables': 'Filters & Consumables', 'Filters & Consumables (from 15 Jan 2026)': 'Filters & Consumables'}
+Current teams (7): ['Billing', 'Filters & Consumables', 'Installs & Demo', 'Product Advice', 'Repairs', 'Returns & Replacement', 'Warranty Claims']
+Raw team values not covered by mapping: none
+sample_submission team values: ['Repairs']
+
+3. RESOLUTION LOG COVERAGE
+Train rows with log row: 10822 (100.0%)
+Train rows with blank final_team: 0
+Unparseable created_at_ist: 0
+Lowest monthly coverage: 100.0%
+Duplicate request_ids in log: 0
+
+4. FIRST_TEAM VS TEAM_LABEL (after mapping)
+Match: 100.0%, mismatches: 0
+
+5. BOT ACCURACY (team_label == final_team)
+Overall: 77.2% (8351 of 10822)
+By month: {'2025-04': '79.3%', '2025-05': '76.6%', '2025-06': '78.8%', '2025-07': '76.3%', '2025-08': '75.0%', '2025-09': '76.5%', '2025-10': '75.5%', '2025-11': '78.4%', '2025-12': '78.6%', '2026-01': '78.2%', '2026-02': '75.3%', '2026-03': '78.8%', '2026-04': '78.9%', '2026-05': '77.0%', '2026-06': '74.1%'}
+By source: {'crm': '77.2%', 'legacy_zoho': '77.1%'}
+By channel: {'chat': '77.7%', 'email': '78.2%', 'ivr': '77.0%', 'whatsapp': '76.5%'}
+By product_family: {'Air Fryer': '81.6%', 'Ceiling Fan': '79.0%', 'Induction Cooktop': '78.5%', 'Mixer Grinder': '80.1%', 'Robot Vacuum': '78.5%', 'Room Heater': '80.5%', 'Water Purifier': '66.5%'}
+By warranty_status: {'in_warranty': '77.8%', 'out_of_warranty': '76.3%', 'shield': '76.6%'}
+
+6. CROSSTAB (rows: team_label, cols: final_team)
+final_team             Billing  Filters & Consumables  Installs & Demo  Product Advice  Repairs  Returns & Replacement  Warranty Claims
+team_label                                                                                                                             
+Billing                   1071                      9              146               7      192                    125              106
+Filters & Consumables       43                    872               67              40      315                     56               65
+Installs & Demo              7                      7             1146              10       10                      2                3
+Product Advice               9                      9                6            1135        9                      4                8
+Repairs                    178                    157              218             182     1993                    214              187
+Returns & Replacement        6                      7                7               7        7                   1132                8
+Warranty Claims              4                      5                6               9        8                      6             1002
+
+7. TRANSFERS
+Distribution: {'0': 8126, '1': 1490, '2': 1206}, mean: 0.36, total: 3902
+transfers==0 but first!=final: 126; transfers>0 but first==final: 351
+
+8. DATES
+Train requests/month: {'2025-04': 734, '2025-05': 748, '2025-06': 685, '2025-07': 725, '2025-08': 744, '2025-09': 684, '2025-10': 706, '2025-11': 731, '2025-12': 762, '2026-01': 703, '2026-02': 688, '2026-03': 777, '2026-04': 697, '2026-05': 734, '2026-06': 704}
+Test requests/month: {'2026-07': 736, '2026-08': 741, '2026-09': 701}
+Test date range: 2026-07-01 00:31:00 to 2026-09-30 23:00:00
+Train/test overlapping days: 0
+
+9. TIMESTAMPS (share of rows resolved before created)
+Raw: {'crm': '0.0%', 'legacy_zoho': '26.4%'}
+After +330 min on legacy_zoho: {'crm': '0.0%', 'legacy_zoho': '0.0%'}
+
+10. MOJIBAKE (share of rows with garbled characters)
+Train by source: {'crm': '0.0%', 'legacy_zoho': '11.1%'}
+Test: 0.0%
+
+11. DUPLICATES
+Duplicate request_id: train 0, test 0, across 0
+Unique texts: train 10159 of 10822 rows; test 2145 of 2178 rows
+Train texts appearing 2+ times: 599; of these with more than one final_team: 17.7%
+Train rows whose final_team differs from their text's majority team: 1.1%
+Unique texts shared train/test: 245
+Test ROWS whose exact text appears in train: 258 (11.8%)
+  of those, text always maps to one final_team in train: 96.1%
+
+12. FEATURE DISTRIBUTIONS (train% vs test%)
+
+channel:
+          train   test
+channel               
+chat      30.8%  29.1%
+email     10.3%  10.3%
+ivr       29.0%  30.3%
+whatsapp  29.8%  30.3%
+
+product_family:
+                   train   test
+product_family                 
+Water Purifier     20.2%  20.9%
+Air Fryer          17.8%  18.3%
+Mixer Grinder      14.9%  14.7%
+Induction Cooktop  13.6%  13.1%
+Room Heater        12.0%  12.1%
+Ceiling Fan        11.9%  11.9%
+Robot Vacuum        9.6%   9.0%
+
+warranty_status:
+                 train   test
+warranty_status              
+in_warranty      54.4%  54.7%
+out_of_warranty  25.2%  25.5%
+shield           20.4%  19.8%
+
+Request text length by channel (train):
+          count  median  min  max
+channel                          
+chat       3337    55.0   12  165
+email      1114    56.0   11  233
+ivr        3141    55.0   10  195
+whatsapp   3230    55.0   10  196

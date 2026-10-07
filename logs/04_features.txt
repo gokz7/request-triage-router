@@ -1,0 +1,31 @@
+1. MESSAGE STRUCTURE
+Rows with 2+ issues: train 12.9%, test 12.9%
+Model trained on first_seg only, accuracy on VALID 2+ issue rows (283): 0.477
+Model trained on last_seg only, accuracy on VALID 2+ issue rows (283): 0.880
+
+2. PRODUCT COLUMN VS TEXT
+train: text names a product 92.1%; product_family contradicts text 16.1%
+valid: text names a product 92.1%; product_family contradicts text 15.9%
+test: text names a product 92.4%; product_family contradicts text 15.9%
+Bot accuracy VALID: mismatch rows 0.749, other rows 0.770
+
+3. MODELS (selected on TUNE, reported on VALID)
+M2 C=0.5: TUNE 0.846, VALID 0.841, macro-F1 0.847
+M4 C=0.5: TUNE 0.863, VALID 0.856, macro-F1 0.857
+M5 C=0.5: TUNE 0.862, VALID 0.855, macro-F1 0.855
+
+4. BEST: M4 (C=0.5) VALID accuracy 0.856 vs bot 0.767
+2+ issues: rows 283, model 0.873, bot 0.806
+1 issue: rows 1852, model 0.853, bot 0.761
+product mismatch: rows 339, model 0.811, bot 0.749
+flag_contradiction: rows 29, model 0.000, bot 0.000
+
+Coverage (auto-route if top probability >= threshold):
+Threshold 0.0: auto-routed 100.0%, accuracy 0.856, below-threshold accuracy nan
+Threshold 0.4: auto-routed 86.4%, accuracy 0.957, below-threshold accuracy 0.214
+Threshold 0.5: auto-routed 85.0%, accuracy 0.970, below-threshold accuracy 0.209
+Threshold 0.6: auto-routed 84.1%, accuracy 0.974, below-threshold accuracy 0.230
+Threshold 0.7: auto-routed 82.2%, accuracy 0.977, below-threshold accuracy 0.297
+Misroute cost per request: bot Rs 173, model Rs 107
+
+Saved M4 refit on all train rows to outputs/model.joblib

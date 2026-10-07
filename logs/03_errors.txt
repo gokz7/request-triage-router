@@ -1,0 +1,29 @@
+1. ACCURACY BY CONFIDENCE BAND
+         rows  accuracy
+band                   
+<0.4      306     0.239
+0.4-0.6   106     0.623
+0.6-0.8   152     0.816
+>=0.8    1571     0.976
+
+2. TOP 10 ERROR TYPES (true -> predicted)
+Returns & Replacement -> Repairs            43
+Product Advice -> Repairs                   38
+Installs & Demo -> Repairs                  35
+Filters & Consumables -> Repairs            23
+Billing -> Repairs                          20
+Warranty Claims -> Repairs                  20
+Warranty Claims -> Returns & Replacement    12
+Warranty Claims -> Installs & Demo          12
+Repairs -> Installs & Demo                  10
+Repairs -> Returns & Replacement            10
+
+3. LOW-CONFIDENCE ROWS (<0.4): 306 (14.3%)
+By product: {'Mixer Grinder': 0.18, 'Water Purifier': 0.176, 'Air Fryer': 0.17, 'Induction Cooktop': 0.124, 'Room Heater': 0.121, 'Robot Vacuum': 0.114, 'Ceiling Fan': 0.114}
+By channel: {'whatsapp': 0.333, 'chat': 0.294, 'ivr': 0.268, 'email': 0.105}
+Predicted team: {'Repairs': 205, 'Installs & Demo': 31, 'Returns & Replacement': 22, 'Warranty Claims': 21, 'Billing': 18, 'Product Advice': 7, 'Filters & Consumables': 2}
+
+4. IF SCORED AGAINST THE BOT LABEL INSTEAD
+Model matches team_label: 0.825
+
+Wrote 50 rows to data/work/errors_review.csv for manual review
