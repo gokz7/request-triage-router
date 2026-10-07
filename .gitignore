@@ -1,0 +1,11 @@
+﻿# Kestrel routing - ignore rules
+data/
+env/
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+outputs/*.pkl
+outputs/*.joblib
+.vscode/
