@@ -107,7 +107,7 @@ def predict(req: ServiceRequest):
     if words:
         reasons.append(f"Words pointing to {team}: " + ", ".join(f'"{w}"' for w in words) + ".")
     if r["n_seg"] >= 2:
-        reasons.append(f'The message raises {r["n_seg"]} issues; Kestrel routes by the last one: "{r["last_seg"]}".')
+        reasons.append(f'The message raises {r["n_seg"]} issues; Kestrel usually routes by the last one: "{r["last_seg"]}".')
     if r["product_mismatch"]:
         reasons.append(f'Check: the product field says {r["product_family"]}, but the message mentions {r["text_product"]}.')
     if not auto and r["n_seg"] >= 2:
